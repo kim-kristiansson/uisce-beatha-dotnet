@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 using WhiskyClub.Api.Data;
 using WhiskyClub.Api.Repositories.Interfaces;
 
