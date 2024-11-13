@@ -11,5 +11,7 @@ namespace WhiskyClub.Api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto request) => Ok(await authService.RegisterAsync(request));
 
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto request) => Ok(await authService.LoginAsync(request));
     }
 }

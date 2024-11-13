@@ -7,19 +7,39 @@ namespace WhiskyClub.Api.Services
 {
     public class AuthService(IUserRepository userRepository, IPasswordService passwordService) :IAuthService
     {
+        public async Task<UserResponseDto> LoginAsync(LoginRequestDto request)
+        {
+            var user = await userRepository.GetUserByEmailAsync(request.Email!);
+
+            if (user == null)
+            {
+                throw new InvalidOperationException("Invalid email or password");
+            }
+
+            bool isPasswordValid = passwordService.VerifyPassword(request.Password!, user.PasswordHash!);
+
+            if (!isPasswordValid)
+            {
+                throw new InvalidOperationException("Invalid email or password");
+            }
+
+            return new UserResponseDto
+            {
+                Email = user.Email
+            };
+        }
+
         public async Task<UserResponseDto> RegisterAsync(RegisterRequestDto request)
         {
-#pragma warning disable CS8602 // Suppress "dereference of a possibly null reference" warnings
-            if (await userRepository.IsEmailRegisteredAsync(request.Email))
+            if (await userRepository.IsEmailRegisteredAsync(request.Email!))
             {
                 throw new InvalidOperationException("Email already registered");
-#pragma warning restore CS8602
             }
 
             var user = new User
             {
                 Email = request.Email,
-                PasswordHash = passwordService.HashPassword(request.Password)
+                PasswordHash = passwordService.HashPassword(request.Password!)
             };
 
             await userRepository.AddAsync(user);
