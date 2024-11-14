@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using Stripe;
 using WhiskyClub.Api.Data;
 using WhiskyClub.Api.Infrastructure;
 using WhiskyClub.Api.Repositories;

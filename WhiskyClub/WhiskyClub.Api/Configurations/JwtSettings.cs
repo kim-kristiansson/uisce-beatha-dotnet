@@ -1,4 +1,4 @@
-﻿namespace WhiskyClub.Api.Services.Configurations
+﻿namespace WhiskyClub.Api.Configurations
 {
     public class JwtSettings
     {

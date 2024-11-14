@@ -2,7 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using WhiskyClub.Api.Models;
-using WhiskyClub.Api.Services.Configurations;
+using WhiskyClub.Api.Configurations;
 using WhiskyClub.Api.Services.Interfaces;
 
 namespace WhiskyClub.Api.Services
