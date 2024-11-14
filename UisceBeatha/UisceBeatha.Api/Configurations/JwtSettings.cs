@@ -2,9 +2,9 @@
 {
     public class JwtSettings
     {
-        public string? Issuer { get; set; }
-        public string? Audience { get; set; }
-        public string? SecurityKey { get; set; }
-        public int ExpiryMinutes { get; set; }
+        public string? Issuer { get; init; }
+        public string? Audience { get; init; }
+        public string? SecurityKey { get; init; }
+        public int ExpiryMinutes { get; init; }
     }
 }
