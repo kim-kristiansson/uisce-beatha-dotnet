@@ -5,18 +5,13 @@ using WhiskyClub.Api.Services.Interfaces;
 
 namespace WhiskyClub.Api.Services
 {
-    public class AuthService(IUserRepository userRepository, IPasswordService passwordService) :IAuthService
+    public class AuthService(IUserRepository userRepository, IPasswordService passwordService, IJwtService jwtService) :IAuthService
     {
         public async Task<UserResponseDto> LoginAsync(LoginRequestDto request)
         {
-            var user = await userRepository.GetUserByEmailAsync(request.Email!);
+            var user = await userRepository.GetUserByEmailAsync(request.Email) ?? throw new InvalidOperationException("Invalid email or password");
 
-            if (user == null)
-            {
-                throw new InvalidOperationException("Invalid email or password");
-            }
-
-            bool isPasswordValid = passwordService.VerifyPassword(request.Password!, user.PasswordHash!);
+            bool isPasswordValid = passwordService.VerifyPassword(request.Password, user.PasswordHash);
 
             if (!isPasswordValid)
             {
@@ -25,13 +20,14 @@ namespace WhiskyClub.Api.Services
 
             return new UserResponseDto
             {
-                Email = user.Email
+                Email = user.Email,
+                Token = jwtService.GenerateToken(user)
             };
         }
 
         public async Task<UserResponseDto> RegisterAsync(RegisterRequestDto request)
         {
-            if (await userRepository.IsEmailRegisteredAsync(request.Email!))
+            if (await userRepository.IsEmailRegisteredAsync(request.Email))
             {
                 throw new InvalidOperationException("Email already registered");
             }
@@ -39,7 +35,7 @@ namespace WhiskyClub.Api.Services
             var user = new User
             {
                 Email = request.Email,
-                PasswordHash = passwordService.HashPassword(request.Password!)
+                PasswordHash = passwordService.HashPassword(request.Password)
             };
 
             await userRepository.AddAsync(user);

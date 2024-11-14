@@ -1,7 +1,9 @@
-﻿namespace WhiskyClub.Api.Services.Interfaces
+﻿using WhiskyClub.Api.Models;
+
+namespace WhiskyClub.Api.Services.Interfaces
 {
     public interface IJwtService
     {
-        string GenerateToken(Guid userId, string email);
+        string GenerateToken(User user);
     }
 }
