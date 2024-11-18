@@ -7,7 +7,7 @@ namespace UisceBeatha.Api.Services
 {
     public class AuthService(IUserRepository userRepository, IPasswordService passwordService, IJwtService jwtService) :IAuthService
     {
-        public async Task<UserResponseDto> LoginAsync(LoginRequestDto request)
+        public async Task<UserResponse> LoginAsync(LoginRequest request)
         {
             var user = await userRepository.GetUserByEmailAsync(request.Email) ?? throw new InvalidOperationException("Invalid email or password");
 
@@ -18,14 +18,15 @@ namespace UisceBeatha.Api.Services
                 throw new InvalidOperationException("Invalid email or password");
             }
 
-            return new UserResponseDto
+            return new UserResponse
             {
+                Id = user.Id.ToString( ),
                 Email = user.Email,
                 Token = jwtService.GenerateToken(user)
             };
         }
 
-        public async Task<UserResponseDto> RegisterAsync(RegisterRequestDto request)
+        public async Task<UserResponse> RegisterAsync(RegisterRequest request)
         {
             if (await userRepository.IsEmailRegisteredAsync(request.Email))
             {
@@ -41,9 +42,11 @@ namespace UisceBeatha.Api.Services
             await userRepository.AddAsync(user);
             await userRepository.SaveChangesAsync();
 
-            return new UserResponseDto
+            return new UserResponse
             {
-                Email = user.Email
+                Id = user.Id.ToString(),
+                Email = user.Email,
+                Token = jwtService.GenerateToken(user)
             };
         }
     }
