@@ -37,8 +37,8 @@ public class EmailService : IEmailService
             Subject = "Test Email",
             Body = "This is a test message.",
             IsBodyHtml = false
-        
-        mailMessage.To.Add("kim.kristiansson@hotmail        
+        };      
+        mailMessage.To.Add("kim.kristiansson@hotmail.com");     
         await smtpClient.SendMailAsync(mailMessage);
     }
 }
