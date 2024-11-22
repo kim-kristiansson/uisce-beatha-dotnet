@@ -4,7 +4,5 @@ using UisceBeatha.Api.Repositories.Interfaces;
 
 namespace UisceBeatha.Api.Repositories;
 
-public class EmailOfInterestRepository(AppDbContext context) :Repository<EmailOfInterest>(context), IEmailOfInterestRepository
-{
-    
-}
+public class NewsletterRepository(AppDbContext context)
+    : Repository<NewsletterSubscription>(context), INewsletterRepository;

@@ -7,48 +7,48 @@ namespace UisceBeatha.Api.Repositories
 {
     public class Repository<T> :IRepository<T> where T : class
     {
-        protected readonly AppDbContext _context;
-        protected readonly DbSet<T> _dbSet;
+        private readonly AppDbContext _context;
+        protected readonly DbSet<T> DbSet;
 
-        public Repository(AppDbContext context)
+        protected Repository(AppDbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            _dbSet = _context.Set<T>();
+            DbSet = _context.Set<T>();
         }
 
         public async Task AddAsync(T entity)
         {
-            await _dbSet.AddAsync(entity);
+            await DbSet.AddAsync(entity);
         }
 
         public async Task AddRangeAsync(IEnumerable<T> entities)
         {
-            await _dbSet.AddRangeAsync(entities);
+            await DbSet.AddRangeAsync(entities);
         }
 
         public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _dbSet.Where(predicate).ToListAsync();
+            return await DbSet.Where(predicate).ToListAsync();
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _dbSet.ToListAsync();
+            return await DbSet.ToListAsync();
         }
 
         public async Task<T?> GetByIdAsync(Guid id)
         {
-            return await _dbSet.FindAsync(id);
+            return await DbSet.FindAsync(id);
         }
 
         public void Remove(T entity)
         {
-            _dbSet.Remove(entity);
+            DbSet.Remove(entity);
         }
 
         public void RemoveRange(IEnumerable<T> entities)
         {
-            _dbSet.RemoveRange(entities);
+            DbSet.RemoveRange(entities);
         }
 
         public async Task<bool> SaveChangesAsync()
@@ -58,7 +58,7 @@ namespace UisceBeatha.Api.Repositories
 
         public void Update(T entity)
         {
-            _dbSet.Update(entity);
+            DbSet.Update(entity);
         }
     }
 }

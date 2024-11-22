@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace UisceBeatha.Api.Dtos;
 
-public class EmailOfInterestRequest
+public class NewsletterSubscriptionRequest
 {
     [Required]
     [EmailAddress]
-    public string EmailAddress { get; init; } = string.Empty;
+    public string Email { get; init; } = string.Empty;
 }

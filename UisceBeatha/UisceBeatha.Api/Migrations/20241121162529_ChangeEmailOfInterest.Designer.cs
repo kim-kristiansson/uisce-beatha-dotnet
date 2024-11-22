@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UisceBeatha.Api.Data;
 
@@ -10,30 +11,30 @@ using UisceBeatha.Api.Data;
 namespace UisceBeatha.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241121162529_ChangeEmailOfInterest")]
+    partial class ChangeEmailOfInterest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
 
-            modelBuilder.Entity("UisceBeatha.Api.Models.NewsletterSubscription", b =>
+            modelBuilder.Entity("UisceBeatha.Api.Models.EmailOfInterest", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(320)
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("SubscribedAt")
+                    b.Property<string>("EmailAddress")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.ToTable("NewsletterSubscriptions");
+                    b.ToTable("Emails");
                 });
 
             modelBuilder.Entity("UisceBeatha.Api.Models.User", b =>

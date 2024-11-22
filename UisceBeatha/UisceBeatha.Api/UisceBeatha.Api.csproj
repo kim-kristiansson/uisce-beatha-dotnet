@@ -17,8 +17,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Scalar.AspNetCore" Version="1.2.35" />
-    <PackageReference Include="Stripe.net" Version="47.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />
+    <PackageReference Include="Scalar.AspNetCore" Version="1.2.42" />
+    <PackageReference Include="Stripe.net" Version="47.2.0-beta.1" />
   </ItemGroup>
 
 </Project>

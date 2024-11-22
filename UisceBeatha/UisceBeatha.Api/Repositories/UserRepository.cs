@@ -9,12 +9,12 @@ namespace UisceBeatha.Api.Repositories
     {
         public async Task<User?> GetUserByEmailAsync(string email)
         {
-            return await _dbSet.FirstOrDefaultAsync(u => u.Email == email);
+            return await DbSet.FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task<bool> IsEmailRegisteredAsync(string email)
         {
-            return await _dbSet.AnyAsync(u => u.Email == email);
+            return await DbSet.AnyAsync(u => u.Email == email);
         }
     }
 }

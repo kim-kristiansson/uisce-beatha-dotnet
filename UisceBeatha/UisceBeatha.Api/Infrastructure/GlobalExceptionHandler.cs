@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using Microsoft.Extensions.Localization;
 
 namespace UisceBeatha.Api.Infrastructure
 {
     public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) :IExceptionHandler
     {
-        private (int StatusCode, string Type) GetStatusAndType(Exception exception)
+        private static (int StatusCode, string Type) GetStatusAndType(Exception exception)
         {
             return exception switch
             {
