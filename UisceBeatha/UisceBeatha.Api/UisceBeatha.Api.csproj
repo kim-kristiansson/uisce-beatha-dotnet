@@ -22,4 +22,12 @@
     <PackageReference Include="Stripe.net" Version="47.2.0-beta.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Images\gyllene-droppen.png" />
+  </ItemGroup>
+
 </Project>

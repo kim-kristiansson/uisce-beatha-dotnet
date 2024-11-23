@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
-using Microsoft.Extensions.Localization;
+using UisceBeatha.Api.Exceptions;
 
 namespace UisceBeatha.Api.Infrastructure
 {
@@ -11,6 +11,8 @@ namespace UisceBeatha.Api.Infrastructure
         {
             return exception switch
             {
+                ConfirmationLinkAlreadySentException => (StatusCodes.Status409Conflict, "https://httpstatuses.com/400"),
+                EmailAlreadyConfirmedException => (StatusCodes.Status400BadRequest, "https://httpstatuses.com/400"),
                 ArgumentException => (StatusCodes.Status400BadRequest, "https://httpstatuses.com/400"),
                 InvalidOperationException => (StatusCodes.Status409Conflict, "https://httpstatuses.com/409"),
                 NullReferenceException => (StatusCodes.Status404NotFound, "https://httpstatuses.com/404"),

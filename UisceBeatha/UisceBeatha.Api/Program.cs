@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
@@ -47,23 +48,45 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddRateLimiter(options =>
 {
+    options.OnRejected = async (OnRejectedContext context, CancellationToken cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json";
+
+        var retryAfter = TimeSpan.FromMinutes(1).TotalSeconds; // Set retry time based on your policy
+
+        // Optionally set Retry-After header
+        context.HttpContext.Response.Headers.RetryAfter = retryAfter.ToString(CultureInfo.InvariantCulture);
+
+        var response = new
+        {
+            error = "Too many requests",
+            retryAfter = retryAfter,
+            message = "Please wait and try again later."
+        };
+
+        await context.HttpContext.Response.WriteAsJsonAsync(response, cancellationToken);
+    };
+
+
     options.AddFixedWindowLimiter("FixedWindowPolicy", limiterOptions =>
     {
-        limiterOptions.PermitLimit = 5; // Allow 5 requests
-        limiterOptions.Window = TimeSpan.FromMinutes(1); // Per 1 minute
+        limiterOptions.PermitLimit = 5;
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
         limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        limiterOptions.QueueLimit = 2; // Allow 2 requests to queue
+        limiterOptions.QueueLimit = 2;
     });
 
     options.AddSlidingWindowLimiter("SlidingWindowPolicy", limiterOptions =>
     {
-        limiterOptions.PermitLimit = 10; // Allow 10 requests
-        limiterOptions.Window = TimeSpan.FromMinutes(1); // Per 1 minute
-        limiterOptions.SegmentsPerWindow = 4; // Divide window into 4 segments
+        limiterOptions.PermitLimit = 10;
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+        limiterOptions.SegmentsPerWindow = 4;
         limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        limiterOptions.QueueLimit = 2; // Allow 2 requests to queue
+        limiterOptions.QueueLimit = 2;
     });
 });
+
 
 builder.Services.AddCors(options =>
 {
