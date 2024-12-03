@@ -14,13 +14,15 @@ namespace GylleneDroppen.Api.Services
 
         public JwtService(IConfiguration configuration)
         {
-            _jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>() ?? throw new ArgumentException("JwtSettings not configured");
+            _jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>() 
+                           ?? throw new ArgumentException("JwtSettings not configured");
 
-            string securityKey = _jwtSettings.SecurityKey ?? throw new ArgumentNullException("SecurityKey not configured in JwtSettings", nameof(_jwtSettings.SecurityKey));
+            var securityKey = configuration["JwtSettings:SecretKey"] 
+                                 ?? throw new InvalidOperationException("SecretKey not configured in JwtSettings");
 
             _key = System.Text.Encoding.UTF8.GetBytes(securityKey);
-
         }
+
 
         public string GenerateToken(User user)
         {

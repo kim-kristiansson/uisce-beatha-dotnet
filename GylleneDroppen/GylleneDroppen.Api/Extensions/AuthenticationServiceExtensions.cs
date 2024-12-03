@@ -8,13 +8,13 @@ public static class AuthenticationServiceExtensions
 {
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        var securityKey = configuration["JwtSettings:SecurityKey"];
+        var securityKey = configuration["JwtSettings:SecretKey"];
 
-        if (string.IsNullOrEmpty(securityKey))
+        if (string.IsNullOrWhiteSpace(securityKey))
         {
-            throw new ArgumentException("JWT:SecurityKey is not configured in appsettings.json");
+            throw new ArgumentException("JWT:SecretKey is not configured. Make sure it is set in Azure Key Vault.");
         }
-        
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -22,7 +22,7 @@ public static class AuthenticationServiceExtensions
                 {
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey)),
                     ValidIssuer = configuration["JwtSettings:Issuer"],
-                    ValidAudience = configuration["JwtSettings:Audience"],
+                    ValidAudience = configuration["JwtSettings:Audience"], 
                     ValidateIssuerSigningKey = true,
                     ValidateIssuer = true,
                     ValidateAudience = true,
