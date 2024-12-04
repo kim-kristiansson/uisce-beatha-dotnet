@@ -1,16 +1,11 @@
 using System.Globalization;
 using System.Threading.RateLimiting;
-using Azure.Identity;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
-using StackExchange.Redis;
 using GylleneDroppen.Api.Data;
 using GylleneDroppen.Api.Extensions;
 using GylleneDroppen.Api.Infrastructure;
-using GylleneDroppen.Api.Models;
 using GylleneDroppen.Api.Repositories;
 using GylleneDroppen.Api.Repositories.Interfaces;
 using GylleneDroppen.Api.Services;
@@ -47,16 +42,6 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
-{
-    Diagnostics = { IsLoggingEnabled = true }
-});
-
-// Use the credential in your Azure Key Vault configuration
-builder.Configuration.AddAzureKeyVault(
-    new Uri(builder.Configuration["AzureVaultUri"]!),
-    credential
-);
 builder.Services.AddRateLimiter(options =>
 {
     options.OnRejected = async (OnRejectedContext context, CancellationToken cancellationToken) =>
