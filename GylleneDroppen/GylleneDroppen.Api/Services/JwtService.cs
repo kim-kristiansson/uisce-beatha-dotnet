@@ -9,12 +9,12 @@ namespace GylleneDroppen.Api.Services
 {
     public class JwtService :IJwtService
     {
-        private readonly JwtSettings _jwtSettings;
+        private readonly JwtConfig _jwtConfig;
         private readonly byte[] _key;
 
         public JwtService(IConfiguration configuration)
         {
-            _jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>() 
+            _jwtConfig = configuration.GetSection("JwtSettings").Get<JwtConfig>() 
                            ?? throw new ArgumentException("JwtSettings not configured");
 
             var securityKey = configuration["JwtSettings:SecretKey"] 
@@ -39,8 +39,8 @@ namespace GylleneDroppen.Api.Services
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddMinutes(60),
-                Issuer = _jwtSettings.Issuer,
-                Audience = _jwtSettings.Audience,
+                Issuer = _jwtConfig.Issuer,
+                Audience = _jwtConfig.Audience,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(_key), SecurityAlgorithms.HmacSha256Signature),
             };
 

@@ -7,14 +7,14 @@ namespace GylleneDroppen.Api.Services;
 
 public class SmtpService : ISmtpService
 {
-    private readonly SmtpSettings _smtpSettings;
+    private readonly SmtpConfig _smtpConfig;
     
     public SmtpService(IConfiguration configuration)
     {
-        _smtpSettings = configuration.GetSection("SmtpSettings").Get<SmtpSettings>()
+        _smtpConfig = configuration.GetSection("SmtpSettings").Get<SmtpConfig>()
                          ?? throw new ArgumentNullException(nameof(configuration), "Email configuration section is missing or invalid.");
 
-        if (string.IsNullOrEmpty(_smtpSettings.SmtpServer) || _smtpSettings.Port == 0 || _smtpSettings.EmailAccounts == null || _smtpSettings.EmailAccounts.Count == 0)
+        if (string.IsNullOrEmpty(_smtpConfig.SmtpServer) || _smtpConfig.Port == 0 || _smtpConfig.EmailAccounts == null || _smtpConfig.EmailAccounts.Count == 0)
         {
             throw new ArgumentException("Email configuration is invalid. Ensure all required fields are set in appsettings.json.");
         }
@@ -22,7 +22,7 @@ public class SmtpService : ISmtpService
     
     public async Task SendEmailAsync(string displayName, string fromEmail, string toEmail, string subject, string message)
     {
-        var emailAccount = _smtpSettings.EmailAccounts
+        var emailAccount = _smtpConfig.EmailAccounts
             .FirstOrDefault(account => account.Email == fromEmail);
 
         if (emailAccount == null)
@@ -30,8 +30,8 @@ public class SmtpService : ISmtpService
             throw new InvalidOperationException($"The email account '{fromEmail}' was not found in the configuration.");
         }
 
-        using var smtpClient = new SmtpClient(_smtpSettings.SmtpServer);
-        smtpClient.Port = _smtpSettings.Port;
+        using var smtpClient = new SmtpClient(_smtpConfig.SmtpServer);
+        smtpClient.Port = _smtpConfig.Port;
         smtpClient.EnableSsl = true;
         smtpClient.Credentials = new NetworkCredential(emailAccount.Email, emailAccount.Password);
         smtpClient.UseDefaultCredentials = false;
