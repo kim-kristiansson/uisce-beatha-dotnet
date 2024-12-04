@@ -1,33 +1,30 @@
 using System.Globalization;
 using System.Threading.RateLimiting;
+using GylleneDroppen.Api.Configurations;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using GylleneDroppen.Api.Data;
 using GylleneDroppen.Api.Extensions;
 using GylleneDroppen.Api.Infrastructure;
-using GylleneDroppen.Api.Repositories;
-using GylleneDroppen.Api.Repositories.Interfaces;
 using GylleneDroppen.Api.Services;
 using GylleneDroppen.Api.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IStripeService, StripeService>();
-builder.Services.AddScoped<ISmtpService, SmtpService>();
-builder.Services.AddScoped<INewsletterRepository, NewsletterRepository>();
-builder.Services.AddScoped<INewsletterService, NewsletterService>();
-builder.Services.AddScoped<IRedisRepository, RedisRepository>();
-builder.Services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
-builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+builder.Services
+    .AddConfigProvider<JwtConfig>(builder.Configuration, "JwtConfig")
+    .AddConfigProvider<SmtpConfig>(builder.Configuration, "SmtpConfig")
+    .AddConfigProvider<NewsletterConfig>(builder.Configuration, "NewsletterConfig")
+    .AddConfigProvider<EmailAccountsConfig>(builder.Configuration, "EmailAccountsConfig")
+    .AddConfigProvider<StripeConfig>(builder.Configuration, "StripeConfig")
+    .AddConfigProvider<ConnectionStringsConfig>(builder.Configuration, "ConnectionStrings")
+    .AddConfigProvider<GlobalConfig>(builder.Configuration, "GlobalConfig");
+
+builder.Services.AddScopedServices();
+builder.Services.AddScopedRepositories();
 
 builder.Services.AddSingleton<IPasswordService, PasswordService>();
-builder.Services.AddSingleton<IJwtService, JwtService>();
-
-builder.Services.AddRedis(builder.Configuration);
 
 builder.Services.AddAuthentication();
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -41,6 +38,9 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+builder.Services.AddRedis(builder.Configuration);
 
 builder.Services.AddRateLimiter(options =>
 {

@@ -2,28 +2,18 @@ using System.Net;
 using System.Net.Mail;
 using GylleneDroppen.Api.Configurations;
 using GylleneDroppen.Api.Services.Interfaces;
+using GylleneDroppen.Api.Utilities.Interfaces;
 
 namespace GylleneDroppen.Api.Services;
 
-public class SmtpService : ISmtpService
+public class SmtpService(IConfigProvider<SmtpConfig> smtpConfigProvider, IConfigProvider<EmailAccountsConfig> emailAccountsConfig) : ISmtpService
 {
-    private readonly SmtpConfig _smtpConfig;
-    
-    public SmtpService(IConfiguration configuration)
-    {
-        _smtpConfig = configuration.GetSection("SmtpSettings").Get<SmtpConfig>()
-                         ?? throw new ArgumentNullException(nameof(configuration), "Email configuration section is missing or invalid.");
+    private readonly SmtpConfig _smtpConfig = smtpConfigProvider.GetConfig();
+    private readonly EmailAccountsConfig _emailAccountsConfig = emailAccountsConfig.GetConfig();
 
-        if (string.IsNullOrEmpty(_smtpConfig.SmtpServer) || _smtpConfig.Port == 0 || _smtpConfig.EmailAccounts == null || _smtpConfig.EmailAccounts.Count == 0)
-        {
-            throw new ArgumentException("Email configuration is invalid. Ensure all required fields are set in appsettings.json.");
-        }
-    }
-    
     public async Task SendEmailAsync(string displayName, string fromEmail, string toEmail, string subject, string message)
     {
-        var emailAccount = _smtpConfig.EmailAccounts
-            .FirstOrDefault(account => account.Email == fromEmail);
+        var emailAccount = _emailAccountsConfig["Info"];
 
         if (emailAccount == null)
         {

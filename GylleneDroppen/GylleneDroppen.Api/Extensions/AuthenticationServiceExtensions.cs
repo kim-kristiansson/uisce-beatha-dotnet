@@ -1,4 +1,5 @@
 using System.Text;
+using GylleneDroppen.Api.Configurations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -8,9 +9,9 @@ public static class AuthenticationServiceExtensions
 {
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        var securityKey = configuration["JwtSettings:SecretKey"];
+        var secretKey = configuration.GetSection("JwtConfig").Get<JwtConfig>()?.SecretKey; 
 
-        if (string.IsNullOrWhiteSpace(securityKey))
+        if (string.IsNullOrWhiteSpace(secretKey))
         {
             throw new ArgumentException("JWT:SecretKey is not configured. Make sure it is set in Azure Key Vault.");
         }
@@ -20,7 +21,7 @@ public static class AuthenticationServiceExtensions
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
                     ValidIssuer = configuration["JwtSettings:Issuer"],
                     ValidAudience = configuration["JwtSettings:Audience"], 
                     ValidateIssuerSigningKey = true,

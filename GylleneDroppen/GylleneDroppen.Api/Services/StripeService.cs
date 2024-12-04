@@ -1,29 +1,22 @@
+using GylleneDroppen.Api.Configurations;
 using GylleneDroppen.Api.Dtos;
 using GylleneDroppen.Api.Repositories.Interfaces;
 using GylleneDroppen.Api.Services.Interfaces;
+using GylleneDroppen.Api.Utilities.Interfaces;
 using Stripe;
-using Stripe.Climate;
 
 namespace GylleneDroppen.Api.Services;
 
-public class StripeService : IStripeService
+public class StripeService(IConfigProvider<StripeConfig> configProvider, IUserRepository userRepository)
+    : IStripeService
 {
-    private readonly IUserRepository _userRepository;
-    private readonly CustomerService _customerService;
-    private readonly SubscriptionService _subscriptionService;
-
-    public StripeService(IConfiguration configuration, IUserRepository userRepository)
-    {
-        StripeConfiguration.ApiKey = configuration["Stripe:Secret"];
-
-        _userRepository = userRepository;
-        _customerService = new CustomerService();
-        _subscriptionService = new SubscriptionService();
-    }
+    private readonly CustomerService _customerService = new();
+    private readonly SubscriptionService _subscriptionService = new();
+    private readonly StripeConfig _stripeConfig = configProvider.GetConfig();
 
     public async Task<Subscription> EnsureSubscription(StripeSubscriptionRequest request)
     {
-        var user = await _userRepository.GetByIdAsync(request.UserId);
+        var user = await userRepository.GetByIdAsync(request.UserId);
 
         if (user == null)
         {
@@ -34,9 +27,9 @@ public class StripeService : IStripeService
             return await CreateSubscriptionAsync(user.StripeCustomerId, request.PriceId);
         
         user.StripeCustomerId = await CreateCustomerAsync(user.Email);
-        _userRepository.Update(user);
+        userRepository.Update(user);
         
-        if(!await _userRepository.SaveChangesAsync())
+        if(!await userRepository.SaveChangesAsync())
             throw new Exception($"Internal error updating user with id {user.Id}");
 
         return await CreateSubscriptionAsync(user.StripeCustomerId, request.PriceId);

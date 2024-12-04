@@ -1,9 +1,11 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 using GylleneDroppen.Api.Configurations;
 using GylleneDroppen.Api.Models;
 using GylleneDroppen.Api.Services.Interfaces;
+using GylleneDroppen.Api.Utilities.Interfaces;
 
 namespace GylleneDroppen.Api.Services
 {
@@ -12,15 +14,10 @@ namespace GylleneDroppen.Api.Services
         private readonly JwtConfig _jwtConfig;
         private readonly byte[] _key;
 
-        public JwtService(IConfiguration configuration)
+        public JwtService(IConfigProvider<JwtConfig> configProvider)
         {
-            _jwtConfig = configuration.GetSection("JwtSettings").Get<JwtConfig>() 
-                           ?? throw new ArgumentException("JwtSettings not configured");
-
-            var securityKey = configuration["JwtSettings:SecretKey"] 
-                                 ?? throw new InvalidOperationException("SecretKey not configured in JwtSettings");
-
-            _key = System.Text.Encoding.UTF8.GetBytes(securityKey);
+            _jwtConfig = configProvider.GetConfig();
+            _key = System.Text.Encoding.UTF8.GetBytes(_jwtConfig.SecretKey ?? throw new InvalidOperationException("SecretKey is required."));
         }
 
 
