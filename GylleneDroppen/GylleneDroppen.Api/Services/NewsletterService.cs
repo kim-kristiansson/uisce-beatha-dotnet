@@ -4,7 +4,7 @@ using GylleneDroppen.Api.Models;
 using GylleneDroppen.Api.Repositories.Interfaces;
 using GylleneDroppen.Api.Services.Interfaces;
 using GylleneDroppen.Api.Utilities;
-using GylleneDroppen.Api.Utilities.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace GylleneDroppen.Api.Services;
 
@@ -13,12 +13,12 @@ public class NewsletterService(
     INewsletterRepository newsletterRepository,
     ISmtpService smtpService,
     IAnalyticsService analyticsService,
-    IConfigProvider<NewsletterConfig> newsletterConfigProvider,
-    IConfigProvider<GlobalConfig> globalConfigProvider)
+    IOptions<NewsletterConfig> newsletterConfigOptions,
+    IOptions<GlobalConfig> globalConfigOptions)
     : INewsletterService
 {
-    private readonly NewsletterConfig _newsletterConfig = newsletterConfigProvider.GetConfig();
-    private readonly string _baseUrl = globalConfigProvider.GetConfig().BaseUrl;
+    private readonly NewsletterConfig _newsletterConfig = newsletterConfigOptions.Value;
+    private readonly string _baseUrl = globalConfigOptions.Value.BaseUrl;
 
     public async Task<string> SendConfirmationEmailAsync(string email)
     {
@@ -40,7 +40,7 @@ public class NewsletterService(
 
         await smtpService.SendEmailAsync(
             displayName: "Gyllene Droppen",
-            fromEmail: "info@gyllenedroppen.se",
+            fromEmail: "info",
             toEmail: email,
             subject: "Bekräfta din e-post för vårt nyhetsbrev",
             message: $"""

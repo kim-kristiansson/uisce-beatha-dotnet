@@ -3,8 +3,6 @@ using GylleneDroppen.Api.Repositories;
 using GylleneDroppen.Api.Repositories.Interfaces;
 using GylleneDroppen.Api.Services;
 using GylleneDroppen.Api.Services.Interfaces;
-using GylleneDroppen.Api.Utilities;
-using GylleneDroppen.Api.Utilities.Interfaces;
 
 namespace GylleneDroppen.Api.Extensions;
 
@@ -22,14 +20,17 @@ public static class ServiceCollectionExtensions
         
         return services;
     }
-
-    public static IServiceCollection AddConfigProvider<T>(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        string sectionName) where T : class, new()
+    
+    public static IServiceCollection AddAppConfigurations(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<IConfigProvider<T>>(
-            _ => new ConfigProvider<T>(configuration, sectionName));
+        services.Configure<JwtConfig>(configuration.GetSection("JwtConfig"));
+        services.Configure<SmtpConfig>(configuration.GetSection("SmtpConfig"));
+        services.Configure<NewsletterConfig>(configuration.GetSection("NewsletterConfig"));
+        services.Configure<EmailAccountsConfig>(configuration.GetSection("EmailAccountsConfig"));
+        services.Configure<StripeConfig>(configuration.GetSection("StripeConfig"));
+        services.Configure<ConnectionStringsConfig>(configuration.GetSection("ConnectionStrings"));
+        services.Configure<GlobalConfig>(configuration.GetSection("GlobalConfig"));
+
         return services;
     }
     

@@ -2,17 +2,17 @@ using GylleneDroppen.Api.Configurations;
 using GylleneDroppen.Api.Dtos;
 using GylleneDroppen.Api.Repositories.Interfaces;
 using GylleneDroppen.Api.Services.Interfaces;
-using GylleneDroppen.Api.Utilities.Interfaces;
+using Microsoft.Extensions.Options;
 using Stripe;
 
 namespace GylleneDroppen.Api.Services;
 
-public class StripeService(IConfigProvider<StripeConfig> configProvider, IUserRepository userRepository)
+public class StripeService(IOptions<StripeConfig> stripeConfigOptions, IUserRepository userRepository)
     : IStripeService
 {
     private readonly CustomerService _customerService = new();
     private readonly SubscriptionService _subscriptionService = new();
-    private readonly StripeConfig _stripeConfig = configProvider.GetConfig();
+    private readonly StripeConfig _stripeConfig = stripeConfigOptions.Value;
 
     public async Task<Subscription> EnsureSubscription(StripeSubscriptionRequest request)
     {

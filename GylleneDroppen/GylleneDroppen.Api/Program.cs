@@ -12,14 +12,7 @@ using GylleneDroppen.Api.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services
-    .AddConfigProvider<JwtConfig>(builder.Configuration, "JwtConfig")
-    .AddConfigProvider<SmtpConfig>(builder.Configuration, "SmtpConfig")
-    .AddConfigProvider<NewsletterConfig>(builder.Configuration, "NewsletterConfig")
-    .AddConfigProvider<EmailAccountsConfig>(builder.Configuration, "EmailAccountsConfig")
-    .AddConfigProvider<StripeConfig>(builder.Configuration, "StripeConfig")
-    .AddConfigProvider<ConnectionStringsConfig>(builder.Configuration, "ConnectionStrings")
-    .AddConfigProvider<GlobalConfig>(builder.Configuration, "GlobalConfig");
+builder.Services.AddAppConfigurations(builder.Configuration);
 
 builder.Services.AddScopedServices();
 builder.Services.AddScopedRepositories();

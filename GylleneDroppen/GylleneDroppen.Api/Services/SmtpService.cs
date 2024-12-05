@@ -2,18 +2,18 @@ using System.Net;
 using System.Net.Mail;
 using GylleneDroppen.Api.Configurations;
 using GylleneDroppen.Api.Services.Interfaces;
-using GylleneDroppen.Api.Utilities.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace GylleneDroppen.Api.Services;
 
-public class SmtpService(IConfigProvider<SmtpConfig> smtpConfigProvider, IConfigProvider<EmailAccountsConfig> emailAccountsConfig) : ISmtpService
+public class SmtpService(IOptions<SmtpConfig> smptConfigOptions, IOptions<EmailAccountsConfig> emailAccountsOptions) : ISmtpService
 {
-    private readonly SmtpConfig _smtpConfig = smtpConfigProvider.GetConfig();
-    private readonly EmailAccountsConfig _emailAccountsConfig = emailAccountsConfig.GetConfig();
+    private readonly SmtpConfig _smtpConfig = smptConfigOptions.Value;
+    private readonly EmailAccountsConfig _emailAccountsConfig = emailAccountsOptions.Value;
 
     public async Task SendEmailAsync(string displayName, string fromEmail, string toEmail, string subject, string message)
     {
-        var emailAccount = _emailAccountsConfig["Info"];
+        var emailAccount = _emailAccountsConfig[$"{fromEmail}"];
 
         if (emailAccount == null)
         {
