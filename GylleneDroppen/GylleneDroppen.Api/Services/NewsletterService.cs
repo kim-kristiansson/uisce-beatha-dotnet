@@ -68,7 +68,7 @@ public class NewsletterService(
         if(!await newsletterRepository.SaveChangesAsync())
             throw new Exception("Failed to increse analytics");
         
-        await redisRepository.SaveAsync(email.ToLowerInvariant(), token, TimeSpan.FromDays(14), "newsletter:confirm");
+        await redisRepository.SaveAsync(email.ToLowerInvariant(), token, TimeSpan.FromHours(24), "newsletter:confirm");
         
         return "A confirmation email has been sent. Please check your inbox.";
     }
