@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.Threading.RateLimiting;
-using GylleneDroppen.Api.Configurations;
+using dotenv.net;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -11,6 +11,10 @@ using GylleneDroppen.Api.Services;
 using GylleneDroppen.Api.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
+
+DotEnv.Load();
+
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddAppConfigurations(builder.Configuration);
 
@@ -109,5 +113,6 @@ app.UseAuthorization();
 app.UseExceptionHandler();
 
 app.MapControllers();
+
 
 app.Run();
