@@ -1,22 +1,24 @@
+using GylleneDroppen.Api.Configurations;
 using GylleneDroppen.Api.Exceptions;
 using GylleneDroppen.Api.Models;
 using GylleneDroppen.Api.Repositories.Interfaces;
 using GylleneDroppen.Api.Services.Interfaces;
 using GylleneDroppen.Api.Utilities;
+using Microsoft.Extensions.Options;
 
 namespace GylleneDroppen.Api.Services;
 
 public class NewsletterService(
-    IConfiguration configuration,
     IRedisRepository redisRepository,
     INewsletterRepository newsletterRepository,
     ISmtpService smtpService,
-    IAnalyticsService analyticsService)
+    IAnalyticsService analyticsService,
+    IOptions<NewsletterConfig> newsletterConfigOptions,
+    IOptions<GlobalConfig> globalConfigOptions)
     : INewsletterService
 {
-    private readonly string _redirectUrl = configuration["NewsletterSettings:ConfirmRedirectUrl"] ?? throw new NullReferenceException("Please set NewsletterSettings:ConfirmRedirectUrl");
-    private readonly string _invalidRedirectUrl = configuration["NewsletterSettings:InvalidTokenRedirectUrl"] ?? throw new NullReferenceException("Please set NewsletterSettings:InvalidTokenRedirectUrl");
-    private readonly string _baseUrl = configuration["BaseUrl"] ?? throw new NullReferenceException("Please set BaseUrl");
+    private readonly NewsletterConfig _newsletterConfig = newsletterConfigOptions.Value;
+    private readonly string _baseUrl = globalConfigOptions.Value.BaseUrl;
 
     public async Task<string> SendConfirmationEmailAsync(string email)
     {
@@ -38,7 +40,7 @@ public class NewsletterService(
 
         await smtpService.SendEmailAsync(
             displayName: "Gyllene Droppen",
-            fromEmail: "info@gyllenedroppen.se",
+            fromEmail: "info",
             toEmail: email,
             subject: "Bekräfta din e-post för vårt nyhetsbrev",
             message: $"""
@@ -76,7 +78,7 @@ public class NewsletterService(
         var storedToken = await redisRepository.GetAsync(email.ToLowerInvariant(), "newsletter:confirm");
         if (storedToken == null || storedToken != token)
         {
-            return _invalidRedirectUrl;
+            return _newsletterConfig.InvalidTokenRedirectUrl;
         }
         
         await redisRepository.DeleteAsync(email.ToLowerInvariant(), "newsletter:confirm");
@@ -93,6 +95,6 @@ public class NewsletterService(
         if(!await newsletterRepository.SaveChangesAsync())
             throw new Exception("Failed to add new subscription");
 
-        return _redirectUrl;
+        return _newsletterConfig.ConfirmRedirectUrl;
     }
 }

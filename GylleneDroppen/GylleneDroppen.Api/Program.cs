@@ -1,33 +1,27 @@
 using System.Globalization;
 using System.Threading.RateLimiting;
+using dotenv.net;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using GylleneDroppen.Api.Data;
 using GylleneDroppen.Api.Extensions;
 using GylleneDroppen.Api.Infrastructure;
-using GylleneDroppen.Api.Repositories;
-using GylleneDroppen.Api.Repositories.Interfaces;
 using GylleneDroppen.Api.Services;
 using GylleneDroppen.Api.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IStripeService, StripeService>();
-builder.Services.AddScoped<ISmtpService, SmtpService>();
-builder.Services.AddScoped<INewsletterRepository, NewsletterRepository>();
-builder.Services.AddScoped<INewsletterService, NewsletterService>();
-builder.Services.AddScoped<IRedisRepository, RedisRepository>();
-builder.Services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
-builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+DotEnv.Load();
+
+builder.Configuration.AddEnvironmentVariables();
+
+builder.Services.AddAppConfigurations(builder.Configuration);
+
+builder.Services.AddScopedServices();
+builder.Services.AddScopedRepositories();
 
 builder.Services.AddSingleton<IPasswordService, PasswordService>();
-builder.Services.AddSingleton<IJwtService, JwtService>();
-
-builder.Services.AddRedis(builder.Configuration);
 
 builder.Services.AddAuthentication();
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -41,6 +35,9 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+builder.Services.AddRedis(builder.Configuration);
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -116,5 +113,6 @@ app.UseAuthorization();
 app.UseExceptionHandler();
 
 app.MapControllers();
+
 
 app.Run();

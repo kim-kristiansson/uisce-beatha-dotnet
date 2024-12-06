@@ -4,23 +4,19 @@ using System.Security.Claims;
 using GylleneDroppen.Api.Configurations;
 using GylleneDroppen.Api.Models;
 using GylleneDroppen.Api.Services.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace GylleneDroppen.Api.Services
 {
     public class JwtService :IJwtService
     {
-        private readonly JwtSettings _jwtSettings;
+        private readonly JwtConfig _jwtConfig;
         private readonly byte[] _key;
 
-        public JwtService(IConfiguration configuration)
+        public JwtService(IOptions<JwtConfig> jwtConfigOptions)
         {
-            _jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>() 
-                           ?? throw new ArgumentException("JwtSettings not configured");
-
-            var securityKey = configuration["JwtSettings:SecretKey"] 
-                                 ?? throw new InvalidOperationException("SecretKey not configured in JwtSettings");
-
-            _key = System.Text.Encoding.UTF8.GetBytes(securityKey);
+            _jwtConfig = jwtConfigOptions.Value;
+            _key = System.Text.Encoding.UTF8.GetBytes(_jwtConfig.SecretKey ?? throw new InvalidOperationException("SecretKey is required."));
         }
 
 
@@ -39,8 +35,8 @@ namespace GylleneDroppen.Api.Services
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddMinutes(60),
-                Issuer = _jwtSettings.Issuer,
-                Audience = _jwtSettings.Audience,
+                Issuer = _jwtConfig.Issuer,
+                Audience = _jwtConfig.Audience,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(_key), SecurityAlgorithms.HmacSha256Signature),
             };
 
