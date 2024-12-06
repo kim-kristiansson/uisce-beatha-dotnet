@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GylleneDroppen.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241124184912_AddAnalytics")]
-    partial class AddAnalytics
+    [Migration("20241206181558_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,26 +24,6 @@ namespace GylleneDroppen.Api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("GylleneDroppen.Api.Models.Analytics", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("ConfirmedNewsletterSignUps")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("LastUpdate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("NewsletterSignUps")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Analytics");
-                });
 
             modelBuilder.Entity("GylleneDroppen.Api.Models.NewsletterSubscription", b =>
                 {

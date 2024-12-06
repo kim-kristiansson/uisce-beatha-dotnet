@@ -40,7 +40,7 @@ public class NewsletterService(
 
         await smtpService.SendEmailAsync(
             displayName: "Gyllene Droppen",
-            fromEmail: "info",
+            emailAlias: "noreply",
             toEmail: email,
             subject: "Bekräfta din e-post för vårt nyhetsbrev",
             message: $"""
