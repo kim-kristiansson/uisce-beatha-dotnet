@@ -11,13 +11,11 @@ public class SmtpService(IOptions<SmtpConfig> smptConfigOptions, IOptions<EmailA
     private readonly SmtpConfig _smtpConfig = smptConfigOptions.Value;
     private readonly EmailAccountsConfig _emailAccountsConfig = emailAccountsOptions.Value;
 
-    public async Task SendEmailAsync(string displayName, string fromEmail, string toEmail, string subject, string message)
+    public async Task SendEmailAsync(string displayName, string emailAlias, string toEmail, string subject, string message)
     {
-        var emailAccount = _emailAccountsConfig[$"{fromEmail}"];
-
-        if (emailAccount == null)
+        if(!_emailAccountsConfig.TryGetValue(emailAlias.ToUpper(), out var emailAccount))
         {
-            throw new InvalidOperationException($"The email account '{fromEmail}' was not found in the configuration.");
+            throw new ArgumentException($"Email configuration for '{emailAlias}' not found.");
         }
 
         using var smtpClient = new SmtpClient(_smtpConfig.SmtpServer);
