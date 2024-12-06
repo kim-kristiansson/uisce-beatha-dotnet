@@ -9,11 +9,16 @@ public static class AuthenticationServiceExtensions
 {
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        var secretKey = configuration.GetSection("JwtConfig").Get<JwtConfig>()?.SecretKey; 
-
-        if (string.IsNullOrWhiteSpace(secretKey))
+        var jwtConfig = configuration.GetSection("JwtConfig").Get<JwtConfig>();
+        
+        if (jwtConfig == null)
         {
-            throw new ArgumentException("JWT:SecretKey is not configured. Make sure it is set in Azure Key Vault.");
+            throw new ArgumentException("JWT configuration is missing. Make sure it is set in the appsettings or environment variables.");
+        }
+
+        if (string.IsNullOrWhiteSpace(jwtConfig.SecretKey))
+        {
+            throw new ArgumentException("JWT SecretKey is not configured. Ensure it is set as an environment variable or in the configuration.");
         }
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -21,12 +26,12 @@ public static class AuthenticationServiceExtensions
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-                    ValidIssuer = configuration["JwtSettings:Issuer"],
-                    ValidAudience = configuration["JwtSettings:Audience"], 
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.SecretKey)),
+                    ValidIssuer = jwtConfig.Issuer,
+                    ValidAudience = jwtConfig.Audience,
                     ValidateIssuerSigningKey = true,
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
+                    ValidateIssuer = !string.IsNullOrWhiteSpace(jwtConfig.Issuer),
+                    ValidateAudience = !string.IsNullOrWhiteSpace(jwtConfig.Audience),
                     ValidateLifetime = true,
                 };
             });
