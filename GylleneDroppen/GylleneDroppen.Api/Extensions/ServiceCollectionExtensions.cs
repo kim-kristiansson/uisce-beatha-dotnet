@@ -30,6 +30,7 @@ public static class ServiceCollectionExtensions
         services.Configure<StripeConfig>(configuration.GetSection("StripeConfig"));
         services.Configure<ConnectionStringsConfig>(configuration.GetSection("ConnectionStrings"));
         services.Configure<GlobalConfig>(configuration.GetSection("GlobalConfig"));
+        services.Configure<FrontendConfig>(configuration.GetSection("FrontendConfig"));
 
         return services;
     }
