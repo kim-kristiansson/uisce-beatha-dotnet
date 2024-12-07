@@ -46,25 +46,41 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-
-    
     public static IServiceCollection AddScopedServices(this IServiceCollection services)
     {
-        services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IStripeService, StripeService>();
-        services.AddScoped<ISmtpService, SmtpService>();
-        services.AddScoped<INewsletterService, NewsletterService>();
-        services.AddScoped<IAnalyticsService, AnalyticsService>();
-        services.AddScoped<IJwtService, JwtService>();
+        var serviceMappings = new Dictionary<Type, Type>
+        {
+            { typeof(IAuthService), typeof(AuthService) },
+            { typeof(IStripeService), typeof(StripeService) },
+            { typeof(ISmtpService), typeof(SmtpService) },
+            { typeof(INewsletterService), typeof(NewsletterService) },
+            { typeof(IAnalyticsService), typeof(AnalyticsService) },
+            { typeof(IJwtService), typeof(JwtService) }
+        };
+
+        foreach (var mapping in serviceMappings)
+        {
+            services.AddScoped(mapping.Key, mapping.Value);
+        }
+
         return services;
     }
     
     public static IServiceCollection AddScopedRepositories(this IServiceCollection services)
     {
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<INewsletterRepository, NewsletterRepository>();
-        services.AddScoped<IRedisRepository, RedisRepository>();
-        services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
+        var repositoryMappings = new Dictionary<Type, Type>
+        {
+            { typeof(IUserRepository), typeof(UserRepository) },
+            { typeof(INewsletterRepository), typeof(NewsletterRepository) },
+            { typeof(IRedisRepository), typeof(RedisRepository) },
+            { typeof(IAnalyticsRepository), typeof(AnalyticsRepository) }
+        };
+
+        foreach (var mapping in repositoryMappings)
+        {
+            services.AddScoped(mapping.Key, mapping.Value);
+        }
+
         return services;
     }
 }
