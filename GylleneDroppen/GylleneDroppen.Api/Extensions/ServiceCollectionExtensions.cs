@@ -23,17 +23,30 @@ public static class ServiceCollectionExtensions
     
     public static IServiceCollection AddAppConfigurations(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<JwtConfig>(configuration.GetSection("JwtConfig"));
-        services.Configure<SmtpConfig>(configuration.GetSection("SmtpConfig"));
-        services.Configure<NewsletterConfig>(configuration.GetSection("NewsletterConfig"));
-        services.Configure<EmailAccountsConfig>(configuration.GetSection("EmailAccountsConfig"));
-        services.Configure<StripeConfig>(configuration.GetSection("StripeConfig"));
-        services.Configure<ConnectionStringsConfig>(configuration.GetSection("ConnectionStrings"));
-        services.Configure<GlobalConfig>(configuration.GetSection("GlobalConfig"));
-        services.Configure<FrontendConfig>(configuration.GetSection("FrontendConfig"));
+        var configMappings = new Dictionary<Type, string>
+        {
+            { typeof(JwtConfig), "JwtConfig" },
+            { typeof(SmtpConfig), "SmtpConfig" },
+            { typeof(NewsletterConfig), "NewsletterConfig" },
+            { typeof(EmailAccountsConfig), "EmailAccountsConfig" },
+            { typeof(StripeConfig), "StripeConfig" },
+            { typeof(ConnectionStringsConfig), "ConnectionStrings" },
+            { typeof(GlobalConfig), "GlobalConfig" },
+            { typeof(FrontendConfig), "FrontendConfig" }
+        };
+
+        foreach (var (configType, sectionName) in configMappings)
+        {
+            var method = typeof(OptionsConfigurationServiceCollectionExtensions)
+                .GetMethod("Configure", [typeof(IServiceCollection), typeof(IConfigurationSection)])!
+                .MakeGenericMethod(configType);
+
+            method.Invoke(null, [services, configuration.GetSection(sectionName)]);
+        }
 
         return services;
     }
+
     
     public static IServiceCollection AddScopedServices(this IServiceCollection services)
     {
