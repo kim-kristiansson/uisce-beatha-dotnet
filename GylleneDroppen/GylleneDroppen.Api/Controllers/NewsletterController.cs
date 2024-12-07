@@ -1,4 +1,5 @@
 using GylleneDroppen.Api.Dtos;
+using GylleneDroppen.Api.Extensions;
 using GylleneDroppen.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -11,11 +12,19 @@ namespace GylleneDroppen.Api.Controllers
     {
         [EnableRateLimiting("SlidingWindowPolicy")]
         [HttpPost("register")]
-        public async Task<IActionResult> SendEmail([FromBody] NewsletterSubscriptionRequest request) =>
-            Ok(await newsletterService.SendConfirmationEmailAsync(request.Email));
-        
+        public async Task<IActionResult> SendEmail([FromBody] NewsletterSubscriptionRequest request)
+        {
+            var response = await newsletterService.SendConfirmationEmailAsync(request.Email);
+
+            return response.ToActionResult();
+        }
+
         [HttpGet("confirm")]
-        public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmNewsletterSubscriptionRequest request) =>
-            Redirect(await newsletterService.ConfirmSubscriptionAsync(request.Email, request.Token));
+        public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmNewsletterSubscriptionRequest request)
+        {
+            var response = await newsletterService.ConfirmSubscriptionAsync(request.Email, request.Token);
+            
+            return response.ToActionResult();
+        }
     }
 }

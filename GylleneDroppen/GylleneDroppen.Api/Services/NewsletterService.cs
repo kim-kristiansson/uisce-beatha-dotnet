@@ -1,5 +1,4 @@
 using GylleneDroppen.Api.Configurations;
-using GylleneDroppen.Api.Exceptions;
 using GylleneDroppen.Api.Models;
 using GylleneDroppen.Api.Repositories.Interfaces;
 using GylleneDroppen.Api.Services.Interfaces;
@@ -14,25 +13,31 @@ public class NewsletterService(
     ISmtpService smtpService,
     IAnalyticsService analyticsService,
     IOptions<NewsletterConfig> newsletterConfigOptions,
-    IOptions<GlobalConfig> globalConfigOptions)
+    IOptions<GlobalConfig> globalConfigOptions,
+    IOptions<FrontendConfig> frontendConfigOptions)
     : INewsletterService
 {
     private readonly NewsletterConfig _newsletterConfig = newsletterConfigOptions.Value;
+    private readonly FrontendConfig _frontendConfig = frontendConfigOptions.Value;
     private readonly string _baseUrl = globalConfigOptions.Value.BaseUrl;
 
-    public async Task<string> SendConfirmationEmailAsync(string email)
+    public async Task<ServiceResponse<string>> SendConfirmationEmailAsync(string email)
     {
         var emailConfirmed = await newsletterRepository.FindAsync(s => s.Email == email);
         if (emailConfirmed.Any())
-        {
-            throw new EmailAlreadyConfirmedException(email);
-        }
-        
+            return ServiceResponse<string>.Failure(
+                title: "Email already in use",
+                detail: $"The email {email} is already in use.",
+                statusCode: StatusCodes.Status409Conflict
+            );
+
         var existingToken = await redisRepository.GetAsync(email.ToLowerInvariant(), "newsletter:confirm");
         if (existingToken != null)
-        {
-            throw new ConfirmationLinkAlreadySentException();
-        }
+            return ServiceResponse<string>.Failure(
+                title: "Confirmation mail already sent",
+                detail: $"A confirmation mail has already been sent to {email}.",
+                statusCode: StatusCodes.Status409Conflict
+            );
         
         var token = TokenGenerator.GenerateToken();
 
@@ -61,25 +66,26 @@ public class NewsletterService(
                           </div>
                       """
         );
-
-
         
         await analyticsService.IncrementSignUpAsync();
         if(!await newsletterRepository.SaveChangesAsync())
-            throw new Exception("Failed to increse analytics");
+            return ServiceResponse<string>.Failure(
+                title: "Failed to save analytics.",
+                detail: $"Something went wrong. The server couldn't save analytics.",
+                statusCode: StatusCodes.Status500InternalServerError
+            );
         
         await redisRepository.SaveAsync(email.ToLowerInvariant(), token, TimeSpan.FromHours(24), "newsletter:confirm");
         
-        return "A confirmation email has been sent. Please check your inbox.";
+        return ServiceResponse<string>.Success("A confirmation email has been sent. Please check your inbox.");
     }
 
-    public async Task<string> ConfirmSubscriptionAsync(string email, string token)
+    public async Task<ServiceResponse<string>> ConfirmSubscriptionAsync(string email, string token)
     {
         var storedToken = await redisRepository.GetAsync(email.ToLowerInvariant(), "newsletter:confirm");
         if (storedToken == null || storedToken != token)
-        {
-            return _newsletterConfig.InvalidTokenRedirectUrl;
-        }
+            return ServiceResponse<string>.Redirect(_frontendConfig.BaseUrl + _frontendConfig.Paths.Error);
+        
         
         await redisRepository.DeleteAsync(email.ToLowerInvariant(), "newsletter:confirm");
 
@@ -92,9 +98,10 @@ public class NewsletterService(
         
         await newsletterRepository.AddAsync(subscription);
         await analyticsService.IncrementConfirmedSignUpAsync();
+        
         if(!await newsletterRepository.SaveChangesAsync())
-            throw new Exception("Failed to add new subscription");
+            return ServiceResponse<string>.Redirect(_frontendConfig.BaseUrl + _frontendConfig.Paths.Error);
 
-        return _newsletterConfig.ConfirmRedirectUrl;
+        return ServiceResponse<string>.Redirect(_frontendConfig.BaseUrl + _frontendConfig.Paths.Success);
     }
 }
