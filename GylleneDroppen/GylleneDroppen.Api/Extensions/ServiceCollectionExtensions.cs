@@ -23,35 +23,64 @@ public static class ServiceCollectionExtensions
     
     public static IServiceCollection AddAppConfigurations(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<JwtConfig>(configuration.GetSection("JwtConfig"));
-        services.Configure<SmtpConfig>(configuration.GetSection("SmtpConfig"));
-        services.Configure<NewsletterConfig>(configuration.GetSection("NewsletterConfig"));
-        services.Configure<EmailAccountsConfig>(configuration.GetSection("EmailAccountsConfig"));
-        services.Configure<StripeConfig>(configuration.GetSection("StripeConfig"));
-        services.Configure<ConnectionStringsConfig>(configuration.GetSection("ConnectionStrings"));
-        services.Configure<GlobalConfig>(configuration.GetSection("GlobalConfig"));
-        services.Configure<FrontendConfig>(configuration.GetSection("FrontendConfig"));
+        var configMappings = new Dictionary<Type, string>
+        {
+            { typeof(JwtConfig), "JwtConfig" },
+            { typeof(SmtpConfig), "SmtpConfig" },
+            { typeof(NewsletterConfig), "NewsletterConfig" },
+            { typeof(EmailAccountsConfig), "EmailAccountsConfig" },
+            { typeof(StripeConfig), "StripeConfig" },
+            { typeof(ConnectionStringsConfig), "ConnectionStrings" },
+            { typeof(GlobalConfig), "GlobalConfig" },
+            { typeof(FrontendConfig), "FrontendConfig" }
+        };
+
+        foreach (var (configType, sectionName) in configMappings)
+        {
+            var method = typeof(OptionsConfigurationServiceCollectionExtensions)
+                .GetMethod("Configure", [typeof(IServiceCollection), typeof(IConfigurationSection)])!
+                .MakeGenericMethod(configType);
+
+            method.Invoke(null, [services, configuration.GetSection(sectionName)]);
+        }
 
         return services;
     }
-    
     public static IServiceCollection AddScopedServices(this IServiceCollection services)
     {
-        services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IStripeService, StripeService>();
-        services.AddScoped<ISmtpService, SmtpService>();
-        services.AddScoped<INewsletterService, NewsletterService>();
-        services.AddScoped<IAnalyticsService, AnalyticsService>();
-        services.AddScoped<IJwtService, JwtService>();
+        var serviceMappings = new Dictionary<Type, Type>
+        {
+            { typeof(IAuthService), typeof(AuthService) },
+            { typeof(IStripeService), typeof(StripeService) },
+            { typeof(ISmtpService), typeof(SmtpService) },
+            { typeof(INewsletterService), typeof(NewsletterService) },
+            { typeof(IAnalyticsService), typeof(AnalyticsService) },
+            { typeof(IJwtService), typeof(JwtService) }
+        };
+
+        foreach (var mapping in serviceMappings)
+        {
+            services.AddScoped(mapping.Key, mapping.Value);
+        }
+
         return services;
     }
     
     public static IServiceCollection AddScopedRepositories(this IServiceCollection services)
     {
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<INewsletterRepository, NewsletterRepository>();
-        services.AddScoped<IRedisRepository, RedisRepository>();
-        services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
+        var repositoryMappings = new Dictionary<Type, Type>
+        {
+            { typeof(IUserRepository), typeof(UserRepository) },
+            { typeof(INewsletterRepository), typeof(NewsletterRepository) },
+            { typeof(IRedisRepository), typeof(RedisRepository) },
+            { typeof(IAnalyticsRepository), typeof(AnalyticsRepository) }
+        };
+
+        foreach (var mapping in repositoryMappings)
+        {
+            services.AddScoped(mapping.Key, mapping.Value);
+        }
+
         return services;
     }
 }
