@@ -81,6 +81,7 @@ builder.Services.AddRateLimiter(options =>
 });
 
 
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNextApp", policy =>
@@ -91,7 +92,16 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
 var app = builder.Build();
+
+var supportedCultures = new[] { "en", "sv" };
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture("en")
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+app.UseRequestLocalization(localizationOptions);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
