@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>f335f6bd-79a7-4f0b-99fc-7c99b13ebf62</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,6 +40,39 @@
     <_ContentIncludedByDefault Remove="publish\UisceBeatha.Api.deps.json" />
     <_ContentIncludedByDefault Remove="publish\UisceBeatha.Api.runtimeconfig.json" />
     <_ContentIncludedByDefault Remove="publish\UisceBeatha.Api.staticwebassets.endpoints.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\ServiceResponse\ErrorrMessages\ErrorMessages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ErrorMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\ServiceResponse\ErrorrMessages\ErrorMessages.sv.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ErrorMessages.sv.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\ServiceResponse\SuccessMessages\SuccessMessages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SuccessMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources\ServiceResponse\ErrorrMessages\ErrorMessages.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ErrorMessages.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\ServiceResponse\ErrorrMessages\ErrorMessages.sv.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ErrorMessages.sv.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\ServiceResponse\SuccessMessages\SuccessMessages.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SuccessMessages.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>

@@ -1,8 +1,11 @@
 using GylleneDroppen.Api.Configurations;
+using GylleneDroppen.Api.Dtos;
 using GylleneDroppen.Api.Models;
 using GylleneDroppen.Api.Repositories.Interfaces;
+using GylleneDroppen.Api.Resources.ServiceResponse.SuccessMessages;
 using GylleneDroppen.Api.Services.Interfaces;
 using GylleneDroppen.Api.Utilities;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 
 namespace GylleneDroppen.Api.Services;
@@ -21,22 +24,22 @@ public class NewsletterService(
     private readonly FrontendConfig _frontendConfig = frontendConfigOptions.Value;
     private readonly string _baseUrl = globalConfigOptions.Value.BaseUrl;
 
-    public async Task<ServiceResponse<string>> SendConfirmationEmailAsync(string email)
+    public async Task<ServiceResponse<SentNewsletterConfirmEmailResponse>> SendConfirmationEmailAsync(string email)
     {
         var emailConfirmed = await newsletterRepository.FindAsync(s => s.Email == email);
         if (emailConfirmed.Any())
-            return ServiceResponse<string>.Failure(
-                title: "Email already in use",
-                detail: $"The email {email} is already in use.",
-                statusCode: StatusCodes.Status409Conflict
+            return ServiceResponse<SentNewsletterConfirmEmailResponse>.Failure(
+                errorKey: "EmailAlreadyInUse",
+                statusCode: StatusCodes.Status409Conflict,
+                email
             );
 
         var existingToken = await redisRepository.GetAsync(email.ToLowerInvariant(), "newsletter:confirm");
         if (existingToken != null)
-            return ServiceResponse<string>.Failure(
-                title: "Confirmation mail already sent",
-                detail: $"A confirmation mail has already been sent to {email}.",
-                statusCode: StatusCodes.Status409Conflict
+            return ServiceResponse<SentNewsletterConfirmEmailResponse>.Failure(
+                errorKey: "ConfirmationEmailAlreadySent",
+                statusCode: StatusCodes.Status409Conflict,
+                email
             );
         
         var token = TokenGenerator.GenerateToken();
@@ -69,15 +72,17 @@ public class NewsletterService(
         
         await analyticsService.IncrementSignUpAsync();
         if(!await newsletterRepository.SaveChangesAsync())
-            return ServiceResponse<string>.Failure(
-                title: "Failed to save analytics.",
-                detail: $"Something went wrong. The server couldn't save analytics.",
+            return ServiceResponse<SentNewsletterConfirmEmailResponse>.Failure(
+                errorKey: "AnalyticsSaveError",
                 statusCode: StatusCodes.Status500InternalServerError
             );
         
         await redisRepository.SaveAsync(email.ToLowerInvariant(), token, TimeSpan.FromHours(24), "newsletter:confirm");
-        
-        return ServiceResponse<string>.Success("A confirmation email has been sent. Please check your inbox.");
+
+        return ServiceResponse<SentNewsletterConfirmEmailResponse>.Success(new SentNewsletterConfirmEmailResponse
+        {
+            Message = LocalizationHelper.GetLocalizedString("ConfirmationEmailSent", SuccessMessages.ResourceManager)
+        });
     }
 
     public async Task<ServiceResponse<string>> ConfirmSubscriptionAsync(string email, string token)

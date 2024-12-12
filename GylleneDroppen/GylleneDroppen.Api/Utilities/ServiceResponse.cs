@@ -1,3 +1,4 @@
+using GylleneDroppen.Api.Resources.ServiceResponse;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GylleneDroppen.Api.Utilities;
@@ -15,13 +16,12 @@ public readonly struct ServiceResponse<T>
         Data = data
     };
     
-    public static ServiceResponse<T> Failure(string title, string detail, int statusCode) => new()
+    public static ServiceResponse<T> Failure(string errorKey, int statusCode, params object[] args) => new()
     {
         IsSuccess = false,
         ProblemDetails = new ProblemDetails
         {
-            Title = title,
-            Detail = detail,
+            Detail = LocalizationHelper.GetLocalizedString(errorKey, ErrorMessages.ResourceManager, args),
             Status = statusCode
         }
     };
