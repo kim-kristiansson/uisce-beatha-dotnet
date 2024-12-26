@@ -2,12 +2,14 @@
 using GylleneDroppen.Api.Models;
 using GylleneDroppen.Api.Repositories.Interfaces;
 using GylleneDroppen.Api.Services.Interfaces;
+using GylleneDroppen.Api.Utilities;
+using Stripe;
 
 namespace GylleneDroppen.Api.Services
 {
     public class AuthService(IUserRepository userRepository, IPasswordService passwordService, IJwtService jwtService) :IAuthService
     {
-        public async Task<UserResponse> LoginAsync(LoginRequest request)
+        public async Task<ServiceResponse<UserResponse>> LoginAsync(LoginRequest request)
         {
             var user = await userRepository.GetUserByEmailAsync(request.Email) ?? throw new InvalidOperationException("Invalid email or password");
 
@@ -15,7 +17,7 @@ namespace GylleneDroppen.Api.Services
 
             if (!isPasswordValid)
             {
-                throw new InvalidOperationException("Invalid email or password");
+                return ServiceResponse<UserResponse>.Failure("InvalidCredentials", 401);
             }
 
             return new UserResponse
@@ -26,7 +28,7 @@ namespace GylleneDroppen.Api.Services
             };
         }
 
-        public async Task<UserResponse> RegisterAsync(RegisterRequest request)
+        public async Task<ServiceResponse<UserResponse>> RegisterAsync(RegisterRequest request)
         {
             if (await userRepository.IsEmailRegisteredAsync(request.Email))
             {

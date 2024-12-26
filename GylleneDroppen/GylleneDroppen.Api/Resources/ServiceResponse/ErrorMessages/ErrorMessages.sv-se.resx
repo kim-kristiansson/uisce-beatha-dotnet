@@ -20,4 +20,10 @@
     <data name="EmailAlreadyInUse" xml:space="preserve">
         <value>E-postadressen används redan.</value>
     </data>
+    <data name="EmailAlreadyRegistered" xml:space="preserve">
+        <value>Denna e-postadress är redan registrerad.</value>
+    </data>
+    <data name="InvalidCredentials" xml:space="preserve">
+        <value>Ogiltig e-postadress eller lösenord.</value>
+    </data>
 </root>

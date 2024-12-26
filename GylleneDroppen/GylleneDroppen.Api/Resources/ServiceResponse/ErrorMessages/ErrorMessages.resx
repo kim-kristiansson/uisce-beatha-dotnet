@@ -27,4 +27,10 @@
     <data name="AnalyticsSaveError" xml:space="preserve">
         <value>Misslyckades med att spara analysdata.</value>
     </data>
+    <data name="InvalidCredentials" xml:space="preserve">
+        <value>Ogiltig e-postadress eller lösenord</value>
+    </data>
+    <data name="EmailAlreadyRegistered" xml:space="preserve">
+        <value>Denna e-postadress är redan registrerad.</value>
+    </data>
 </root>
