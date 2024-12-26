@@ -20,19 +20,21 @@ namespace GylleneDroppen.Api.Services
                 return ServiceResponse<UserResponse>.Failure("InvalidCredentials", 401);
             }
 
-            return new UserResponse
+            var response = new UserResponse
             {
                 Id = user.Id.ToString( ),
                 Email = user.Email,
                 Token = jwtService.GenerateToken(user)
             };
+            
+            return ServiceResponse<UserResponse>.Success(response);
         }
 
         public async Task<ServiceResponse<UserResponse>> RegisterAsync(RegisterRequest request)
         {
             if (await userRepository.IsEmailRegisteredAsync(request.Email))
             {
-                throw new InvalidOperationException("Email already registered");
+                return ServiceResponse<UserResponse>.Failure("EmailAlreadyRegistered", 409);
             }
 
             var user = new User
@@ -44,12 +46,14 @@ namespace GylleneDroppen.Api.Services
             await userRepository.AddAsync(user);
             await userRepository.SaveChangesAsync();
 
-            return new UserResponse
+            var response = new UserResponse
             {
                 Id = user.Id.ToString(),
                 Email = user.Email,
                 Token = jwtService.GenerateToken(user)
             };
+            
+            return ServiceResponse<UserResponse>.Success(response);
         }
     }
 }
