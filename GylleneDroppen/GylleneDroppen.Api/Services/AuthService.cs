@@ -1,5 +1,4 @@
 ﻿using GylleneDroppen.Api.Dtos;
-using GylleneDroppen.Api.Models;
 using GylleneDroppen.Api.Repositories.Interfaces;
 using GylleneDroppen.Api.Services.Interfaces;
 using GylleneDroppen.Api.Utilities;
@@ -7,9 +6,9 @@ using Stripe;
 
 namespace GylleneDroppen.Api.Services
 {
-    public class AuthService(IUserRepository userRepository, IPasswordService passwordService, IJwtService jwtService) :IAuthService
+    public class AuthService(IUserRepository userRepository, IPasswordService passwordService, IJwtService jwtService, IRedisRepository redisRepository, ISmtpService smtpService) :IAuthService
     {
-        public async Task<ServiceResponse<UserResponse>> LoginAsync(LoginRequest request)
+        public async Task<ServiceResponse<LoginResponse>> LoginAsync(LoginRequest request)
         {
             var user = await userRepository.GetUserByEmailAsync(request.Email) ?? throw new InvalidOperationException("Invalid email or password");
 
@@ -17,43 +16,38 @@ namespace GylleneDroppen.Api.Services
 
             if (!isPasswordValid)
             {
-                return ServiceResponse<UserResponse>.Failure("InvalidCredentials", 401);
+                return ServiceResponse<LoginResponse>.Failure("InvalidCredentials", 401);
             }
 
-            var response = new UserResponse
+            var response = new LoginResponse
             {
                 Id = user.Id.ToString( ),
                 Email = user.Email,
                 Token = jwtService.GenerateToken(user)
             };
             
-            return ServiceResponse<UserResponse>.Success(response);
+            return ServiceResponse<LoginResponse>.Success(response);
         }
 
-        public async Task<ServiceResponse<UserResponse>> RegisterAsync(RegisterRequest request)
+        public async Task<ServiceResponse<RegisterResponse>> RegisterAsync(RegisterRequest request)
         {
             if (await userRepository.IsEmailRegisteredAsync(request.Email))
             {
-                return ServiceResponse<UserResponse>.Failure("EmailAlreadyRegistered", 409);
+                return ServiceResponse<RegisterResponse>.Failure("EmailAlreadyRegistered", 409);
             }
+            
+            var verificationCode = CodeGenerator.GenerateVerificationCode();
+            
+            await redisRepository.SaveAsync($"verification:{request.Email}", verificationCode, TimeSpan.FromMinutes(15));
 
-            var user = new User
+            const string subject = "Verifiera din e-postadress";
+            var message = $"Din verifieringskod är: <strong>{verificationCode}</strong>";
+            await smtpService.SendEmailAsync("Gyllene Droppen", "NoReply", request.Email, subject, message);
+
+            return ServiceResponse<RegisterResponse>.Success(new RegisterResponse
             {
                 Email = request.Email,
-                PasswordHash = passwordService.HashPassword(request.Password)
-            };
-
-            await userRepository.AddAsync(user);
-            await userRepository.SaveChangesAsync();
-
-            var response = new UserResponse
-            {
-                Id = user.Id.ToString(),
-                Email = user.Email,
-                Token = jwtService.GenerateToken(user)
-            };
-            
-            return ServiceResponse<UserResponse>.Success(response);
+            });
         }
     }
 }

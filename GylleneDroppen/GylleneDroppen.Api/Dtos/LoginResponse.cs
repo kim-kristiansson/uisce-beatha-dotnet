@@ -1,6 +1,6 @@
 ﻿namespace GylleneDroppen.Api.Dtos
 {
-    public class UserResponse
+    public class LoginResponse
     {
         public string? Id { get; init; }
         public string? Email { get; init; }

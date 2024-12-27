@@ -5,7 +5,7 @@ namespace GylleneDroppen.Api.Services.Interfaces
 {
     public interface IAuthService
     {
-        Task<ServiceResponse<UserResponse>> RegisterAsync(RegisterRequest request);
-        Task<ServiceResponse<UserResponse>> LoginAsync(LoginRequest request);
+        Task<ServiceResponse<RegisterResponse>> RegisterAsync(RegisterRequest request);
+        Task<ServiceResponse<LoginResponse>> LoginAsync(LoginRequest request);
     }
 }
