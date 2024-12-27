@@ -26,4 +26,10 @@
     <data name="EmailAlreadyRegistered" xml:space="preserve">
         <value>This email is already registered.</value>
     </data>
+    <data name="VerificationCodeExpired" xml:space="preserve">
+        <value>The verification code has expired. Please request a new one.</value>
+    </data>
+    <data name="InvalidVerificationCode" xml:space="preserve">
+        <value>The verification code you entered is invalid. Please try again.</value>
+    </data>
 </root>

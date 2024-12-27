@@ -49,5 +49,25 @@ namespace GylleneDroppen.Api.Services
                 Email = request.Email,
             });
         }
+
+        public async Task<ServiceResponse<string>> VerifyEmailAsync(VerifyEmailRequest request)
+        {
+            var redisKey = $"verification:{request.Email}";
+            var storedCode = await redisRepository.GetAsync(redisKey);
+
+            if (storedCode == null)
+            {
+                return ServiceResponse<string>.Failure("VerificationCodeExpired", 400);
+            }
+
+            if (storedCode != request.VerificationCode)
+            {
+                return ServiceResponse<string>.Failure("InvalidVerificationCode", 400);
+            }
+            
+            await redisRepository.DeleteAsync(redisKey);
+            
+            return ServiceResponse<string>.Success("Email verified successfully.");
+        }
     }
 }

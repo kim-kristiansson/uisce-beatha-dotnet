@@ -33,4 +33,10 @@
     <data name="EmailAlreadyRegistered" xml:space="preserve">
         <value>Denna e-postadress är redan registrerad.</value>
     </data>
+    <data name="VerificationCodeExpired" xml:space="preserve">
+        <value>Verifieringskoden har gått ut. Vänligen begär en ny kod.</value>
+    </data>
+    <data name="InvalidVerificationCode" xml:space="preserve">
+        <value>Verifieringskoden du angav är ogiltig. Försök igen.</value>
+    </data>
 </root>

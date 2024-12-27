@@ -26,4 +26,10 @@
     <data name="InvalidCredentials" xml:space="preserve">
         <value>Ogiltig e-postadress eller lösenord.</value>
     </data>
+    <data name="VerificationCodeExpired" xml:space="preserve">
+        <value>Verifieringskoden har gått ut. Vänligen begär en ny kod.</value>
+    </data>
+    <data name="InvalidVerificationCode" xml:space="preserve">
+        <value>The verification code you entered is invalid. Please try again.</value>
+    </data>
 </root>

@@ -22,5 +22,12 @@ namespace GylleneDroppen.Api.Controllers
             var response = await authService.LoginAsync(request);
             return response.ToActionResult();
         }
+
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request)
+        {
+            var response = await authService.VerifyEmailAsync(request);
+            return response.ToActionResult();
+        }
     }
 }
