@@ -1,4 +1,5 @@
 ﻿using GylleneDroppen.Api.Models;
+using GylleneDroppen.Api.Models.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace GylleneDroppen.Api.Data
@@ -14,6 +15,12 @@ namespace GylleneDroppen.Api.Data
             modelBuilder.Entity<NewsletterSubscription>()
                 .Property(n => n.Email)
                 .HasMaxLength(320);
+
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
+            
+            modelBuilder.Entity<User>()
+                .Property(u => u.PasswordHash)
+                .HasMaxLength(255);
         }
     }
 }
