@@ -51,7 +51,6 @@ public static class ServiceCollectionExtensions
         var serviceMappings = new Dictionary<Type, Type>
         {
             { typeof(IAuthService), typeof(AuthService) },
-            { typeof(IStripeService), typeof(StripeService) },
             { typeof(ISmtpService), typeof(SmtpService) },
             { typeof(INewsletterService), typeof(NewsletterService) },
             { typeof(IAnalyticsService), typeof(AnalyticsService) },

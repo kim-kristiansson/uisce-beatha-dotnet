@@ -10,6 +10,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Email).HasMaxLength(320);
         builder.Property(u => u.Firstname).HasMaxLength(100);
         builder.Property(u => u.Lastname).HasMaxLength(100);
+        builder.Property(u => u.PasswordHash).HasMaxLength(255);
         
         builder
             .HasOne(u => u.Address)

@@ -12,15 +12,8 @@ namespace GylleneDroppen.Api.Data
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<NewsletterSubscription>()
-                .Property(n => n.Email)
-                .HasMaxLength(320);
-
             modelBuilder.ApplyConfiguration(new UserConfiguration());
-            
-            modelBuilder.Entity<User>()
-                .Property(u => u.PasswordHash)
-                .HasMaxLength(255);
+            modelBuilder.ApplyConfiguration(new NewsletterSubscriptionConfiguration());
         }
     }
 }
