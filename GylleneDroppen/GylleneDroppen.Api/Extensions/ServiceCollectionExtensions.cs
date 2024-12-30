@@ -54,7 +54,8 @@ public static class ServiceCollectionExtensions
             { typeof(ISmtpService), typeof(SmtpService) },
             { typeof(INewsletterService), typeof(NewsletterService) },
             { typeof(IAnalyticsService), typeof(AnalyticsService) },
-            { typeof(IJwtService), typeof(JwtService) }
+            { typeof(IJwtService), typeof(JwtService) },
+            { typeof(IStripeService), typeof(StripeService) }
         };
 
         foreach (var mapping in serviceMappings)
