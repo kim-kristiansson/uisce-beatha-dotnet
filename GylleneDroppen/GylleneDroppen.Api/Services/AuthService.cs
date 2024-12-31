@@ -1,87 +1,58 @@
-﻿using GylleneDroppen.Api.Dtos;
+﻿using System.Text.Json;
+using GylleneDroppen.Api.Dtos;
 using GylleneDroppen.Api.Repositories.Interfaces;
 using GylleneDroppen.Api.Services.Interfaces;
 using GylleneDroppen.Api.Utilities;
-using Newtonsoft.Json;
-using Stripe;
 
 namespace GylleneDroppen.Api.Services
 {
-    public class AuthService(IUserRepository userRepository, IPasswordService passwordService, IJwtService jwtService, IRedisRepository redisRepository, IStripeService stripeService) :IAuthService
+    public class AuthService(IUserRepository userRepository, IRedisRepository redisRepository, ISmtpService smtpService) :IAuthService
     {
-        public async Task<ServiceResponse<LoginResponse>> LoginAsync(LoginRequest request)
-        {
-            var user = await userRepository.GetUserByEmailAsync(request.Email) ?? throw new InvalidOperationException("Invalid email or password");
-
-            var isPasswordValid = passwordService.VerifyPassword(request.Password, user.PasswordHash);
-
-            if (!isPasswordValid)
-            {
-                return ServiceResponse<LoginResponse>.Failure("InvalidCredentials", 401);
-            }
-
-            var response = new LoginResponse
-            {
-                Id = user.Id.ToString( ),
-                Email = user.Email,
-                Token = jwtService.GenerateToken(user)
-            };
-            
-            return ServiceResponse<LoginResponse>.Success(response);
-        }
-
-        public async Task<ServiceResponse<RegisterResponse>> RegisterAsync(RegisterRequest request)
+        public async Task<ServiceResponse<string>> RegisterAsync(RegisterRequest request)
         {
             if (await userRepository.IsEmailRegisteredAsync(request.Email))
             {
-                return ServiceResponse<RegisterResponse>.Failure("EmailAlreadyRegistered", 409);
+                return ServiceResponse<string>.Failure("EmailAlreadyRegistered", 409);
             }
 
             var tempUserData = new
             {
-                request.Email,
-                PasswordHash = passwordService.HashPassword(request.Password),
-                request.Firstname,
-                request.Lastname,
-                request.City,
-                request.PostalCode,
-                request.StreetAddress
+                Email = request.Email,
+                Password = request.Password,
             };
             
-            const string successUrl = "https://yourapp.com/success?session_id={CHECKOUT_SESSION_ID}";
-            const string cancelUrl = "https://yourapp.com/cancel";
+            var tempUserJson = JsonSerializer.Serialize(tempUserData);
+            
+            await redisRepository.SaveAsync($"tempUser:{request.Email}", tempUserJson, TimeSpan.FromMinutes(15));
 
-            var stripeSessionId = await stripeService.CreateCheckoutSessionAsync(
-                request.Email,
-                request.Email,
-                successUrl,
-                cancelUrl
+            var verificationCode = CodeGenerator.GenerateVerificationCode();
+            
+            await redisRepository.SaveAsync($"verificationCode:{verificationCode}", verificationCode, TimeSpan.FromMinutes(15));
+            
+            await smtpService.SendEmailAsync(
+                "Gyllene Droppen", 
+                "NoReply", 
+                request.Email, 
+                "Verifiera Din E-Post", 
+                $"Din verifieringskod är: <strong>{verificationCode}</strong>"
             );
 
-            return ServiceResponse<RegisterResponse>.Success(new RegisterResponse
-            {
-                Email = request.Email,
-                StripeSessionId = stripeSessionId
-            });
+            return ServiceResponse<string>.Success("Verification email sent successfully.");
         }
 
         public async Task<ServiceResponse<string>> VerifyEmailAsync(VerifyEmailRequest request)
         {
-            var redisKey = $"verification:{request.Email}";
-            var storedCode = await redisRepository.GetAsync(redisKey);
+            var storedCode = await redisRepository.GetAsync($"verification:{request.Email}");
 
-            if (storedCode == null)
+            if (storedCode == null || storedCode != request.VerificationCode)
             {
-                return ServiceResponse<string>.Failure("VerificationCodeExpired", 400);
-            }
-
-            if (storedCode != request.VerificationCode)
-            {
-                return ServiceResponse<string>.Failure("InvalidVerificationCode", 400);
+                return ServiceResponse<string>.Failure("InvalidVerificationCoded", 404);
             }
             
-            await redisRepository.DeleteAsync(redisKey);
+            await redisRepository.DeleteAsync($"verification:{request.Email}");
             
+            await redisRepository.SaveAsync($"verifiedEmail:{request.Email}", "true", TimeSpan.FromHours(1));
+
             return ServiceResponse<string>.Success("Email verified successfully.");
         }
     }
