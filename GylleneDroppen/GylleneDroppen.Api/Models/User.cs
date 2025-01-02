@@ -7,7 +7,7 @@
         public string PasswordHash { get; init; } = string.Empty;
         public string Firstname { get; init; } = string.Empty;
         public string Lastname { get; init; } = string.Empty;
-
-        public Address Address { get; init; } = null!;
+        public UserProfile Profile { get; init; } = null!;
+        public BillingInfo? BillingInfo { get; init; }
     }
 }

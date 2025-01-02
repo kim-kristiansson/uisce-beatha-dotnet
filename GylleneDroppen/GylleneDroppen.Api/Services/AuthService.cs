@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using GylleneDroppen.Api.Dtos;
+using GylleneDroppen.Api.Models;
 using GylleneDroppen.Api.Repositories.Interfaces;
 using GylleneDroppen.Api.Services.Interfaces;
 using GylleneDroppen.Api.Utilities;
@@ -49,11 +50,25 @@ namespace GylleneDroppen.Api.Services
                 return ServiceResponse<string>.Failure("InvalidVerificationCoded", 404);
             }
             
-            await redisRepository.DeleteAsync($"verification:{request.Email}");
-            
-            await redisRepository.SaveAsync($"verifiedEmail:{request.Email}", "true", TimeSpan.FromHours(1));
+            var tempUserJson = await redisRepository.GetAsync($"tempUser:{request.Email}");
 
-            return ServiceResponse<string>.Success("Email verified successfully.");
+            if (tempUserJson == null)
+            {
+                return ServiceResponse<string>.Failure("UserDataExpired", 400);
+            }
+            
+            var tempUserData = JsonSerializer.Deserialize<dynamic>(tempUserJson);
+
+            var user = new User
+            {
+                Email = tempUserData.email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(tempUserData.Password)
+            };
+            
+            await userRepository.AddAsync(user);
+            await userRepository.SaveChangesAsync();
+            
+            return ServiceResponse<string>.Success("User created and email verified successfully.");
         }
     }
 }
