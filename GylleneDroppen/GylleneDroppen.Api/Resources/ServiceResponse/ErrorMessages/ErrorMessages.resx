@@ -39,4 +39,10 @@
     <data name="InvalidVerificationCode" xml:space="preserve">
         <value>Verifieringskoden du angav är ogiltig. Försök igen.</value>
     </data>
+    <data name="UserDataExpired" xml:space="preserve">
+        <value>Användardata har gått ut.</value>
+    </data>
+    <data name="DeserializationFailed" xml:space="preserve">
+        <value>Kunde inte läsa användardata.</value>
+    </data>
 </root>

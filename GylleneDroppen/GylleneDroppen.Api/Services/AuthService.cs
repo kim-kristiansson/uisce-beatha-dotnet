@@ -3,6 +3,7 @@ using GylleneDroppen.Api.Dtos;
 using GylleneDroppen.Api.Models;
 using GylleneDroppen.Api.Repositories.Interfaces;
 using GylleneDroppen.Api.Services.Interfaces;
+using GylleneDroppen.Api.TemporaryData;
 using GylleneDroppen.Api.Utilities;
 
 namespace GylleneDroppen.Api.Services
@@ -16,7 +17,7 @@ namespace GylleneDroppen.Api.Services
                 return ServiceResponse<string>.Failure("EmailAlreadyRegistered", 409);
             }
 
-            var tempUserData = new
+            var tempUserData = new TempUserData
             {
                 Email = request.Email,
                 Password = request.Password,
@@ -57,11 +58,16 @@ namespace GylleneDroppen.Api.Services
                 return ServiceResponse<string>.Failure("UserDataExpired", 400);
             }
             
-            var tempUserData = JsonSerializer.Deserialize<dynamic>(tempUserJson);
+            var tempUserData = JsonSerializer.Deserialize<TempUserData>(tempUserJson);
+            
+            if (tempUserData == null)
+            {
+                return ServiceResponse<string>.Failure("DeserializationFailed", 500);
+            }
 
             var user = new User
             {
-                Email = tempUserData.email,
+                Email = tempUserData.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(tempUserData.Password)
             };
             

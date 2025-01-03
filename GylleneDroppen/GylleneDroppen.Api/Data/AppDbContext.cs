@@ -13,7 +13,11 @@ namespace GylleneDroppen.Api.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new BillingInfoConfiguration());
+            modelBuilder.ApplyConfiguration(new UserProfileConfiguration());
             modelBuilder.ApplyConfiguration(new NewsletterSubscriptionConfiguration());
+            
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
